@@ -407,13 +407,21 @@
             const groupId = document.getElementById('group-select').value;
             const btn = document.getElementById('confirm-btn');
 
-            if (!student) { showMessage("Por favor, selecione seu nome na lista.", true); return; }
-            if (!groupId) { showMessage("Por favor, escolha uma equipe.", true); return; }
+            if (!student) { showMessage("Por favor, selecione o seu nome na lista.", true); return; }
+            if (!groupId) { showMessage("Por favor, escolha uma equipa.", true); return; }
+
+            // Verificação de segurança anti-concorrência: garante que o aluno não foi escolhido noutro computador no mesmo segundo
+            const studentsInGroups = Object.values(groups).flat();
+            if (studentsInGroups.includes(student)) {
+                showMessage("Atenção: Este nome já foi selecionado por outro colega neste momento!", true);
+                renderStudentsDropdown(); // Atualiza a lista para remover o nome
+                return;
+            }
 
             const maxMembers = classData[currentClass].maxMembers;
 
             if (groups[groupId].length >= maxMembers) {
-                showMessage(`A Equipe ${groupId} já está lotada!`, true);
+                showMessage(`A Equipa ${groupId} já está lotada!`, true);
                 return;
             }
 
