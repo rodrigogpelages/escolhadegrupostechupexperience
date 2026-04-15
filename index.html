@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organização de Equipes - TECHCUP 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        /* Loader spinner */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-gray-800 min-h-screen flex flex-col items-center py-10 px-4">
+
+    <!-- Header -->
+    <header class="w-full max-w-5xl text-center mb-10">
+        <h2 class="text-blue-600 font-bold tracking-wider text-sm uppercase mb-2">Feira de Inovação Tecnológica 2026</h2>
+        <h1 class="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4">TECHCUP EXPERIENCE</h1>
+        <p class="text-lg text-gray-600 font-medium">A Copa das Inovações - Escolha sua Equipe</p>
+    </header>
+
+    <!-- Tela de Carregamento Inicial -->
+    <div id="loading-view" class="w-full max-w-2xl text-center py-20 flex flex-col items-center">
+        <div class="loader mb-4"></div>
+        <p class="text-gray-600 font-medium">Conectando ao servidor...</p>
+    </div>
+
+    <!-- Tela 1: Escolha da Turma -->
+    <div id="class-selection-view" class="hidden w-full max-w-2xl mx-auto text-center glass-panel rounded-2xl p-8 md:p-12 mb-10">
+        <h3 class="text-2xl md:text-3xl font-bold mb-8 text-gray-800">Selecione a sua Turma</h3>
+        <div class="flex flex-col md:flex-row gap-6 justify-center">
+            <button onclick="window.selectClass('1_ipi')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 px-8 rounded-xl transition-colors shadow-lg shadow-blue-500/30 text-xl">
+                1ª IPI
+            </button>
+            <button onclick="window.selectClass('2_ipi')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 px-8 rounded-xl transition-colors shadow-lg shadow-emerald-500/30 text-xl">
+                2ª IPI
+            </button>
+        </div>
+    </div>
+
+    <!-- Tela 2: Área Principal do Sistema -->
+    <main id="main-app-view" class="hidden w-full max-w-5xl">
+        
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <button onclick="window.goBack()" class="text-gray-500 hover:text-gray-800 font-medium flex items-center gap-2 transition-colors text-sm md:text-base">
+                ← Voltar<span class="hidden md:inline"> para seleção de turmas</span>
+            </button>
+            <div class="text-left md:text-right">
+                <h2 id="current-class-title" class="text-lg md:text-xl font-bold bg-gray-200 px-3 md:px-4 py-1 rounded-full text-gray-700 inline-block mb-1"></h2>
+                <p id="current-class-teachers" class="text-xs md:text-sm text-gray-500 font-bold px-1 md:px-2"></p>
+            </div>
+        </div>
+
+        <!-- Painel de Inscrição -->
+        <section class="glass-panel rounded-2xl p-5 md:p-8 mb-10 border-2 border-blue-100">
+            
+            <!-- Aviso Importante -->
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-r-lg">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <span class="text-amber-500 text-xl">⚠️</span>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-bold text-amber-800">Aviso Importante:</h3>
+                        <p class="text-sm text-amber-700 mt-1 font-medium">
+                            Escolha com paciência e atenção! <strong>Após confirmar, você não poderá sair ou trocar de grupo.</strong> 
+                            Para qualquer alteração ou remoção, será necessário falar com um dos professores responsáveis.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span>🚀</span> Junte-se a um Grupo
+            </h3>
+            
+            <div id="message-box" class="hidden p-4 mb-6 rounded-lg font-medium text-sm"></div>
+
+            <div class="flex flex-col md:flex-row gap-4 items-end">
+                <div class="w-full md:w-2/5">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2" for="student-select">Seu Nome:</label>
+                    <select id="student-select" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none transition-colors">
+                        <option value="">Selecione o seu nome...</option>
+                        <!-- Preenchido via JS -->
+                    </select>
+                </div>
+                
+                <div class="w-full md:w-2/5">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2" for="group-select">Escolha a Equipe:</label>
+                    <select id="group-select" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none transition-colors">
+                        <option value="">Selecione um grupo...</option>
+                        <option value="1">Equipe 1</option>
+                        <option value="2">Equipe 2</option>
+                        <option value="3">Equipe 3</option>
+                        <option value="4">Equipe 4</option>
+                    </select>
+                </div>
+
+                <div class="w-full md:w-1/5">
+                    <button id="confirm-btn" onclick="window.joinGroup()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-lg shadow-blue-500/30 flex justify-center items-center h-[50px]">
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Grade de Grupos -->
+        <section id="groups-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Cards gerados via JS -->
+        </section>
+    </main>
+
+    <!-- Lógica do Sistema e Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // CONFIGURAÇÃO DO FIREBASE PARA O GITHUB PAGES
+        // ==========================================
+        let firebaseConfig;
+        
+        // Esta checagem permite que o código rode aqui na minha tela de preview
+        if (typeof __firebase_config !== 'undefined') {
+            firebaseConfig = JSON.parse(__firebase_config);
+        } else {
+            // PROFESSOR: Quando for hospedar no GitHub, cole aqui as credenciais do seu projeto Firebase!
+            firebaseConfig = {
+                apiKey: "AIzaSyAAVaCeBIWVN9oYHS3Dbg_eZDw5YA2lb84",
+                authDomain: "avaliacao-logica-46f5e.firebaseapp.com",
+                projectId: "avaliacao-logica-46f5e",
+                storageBucket: "avaliacao-logica-46f5e.firebasestorage.app",
+                messagingSenderId: "864696613529",
+                appId: "1:864696613529:web:031df7f1e9254c40945608"
+            };
+        }
+
+        const projectAppId = typeof __app_id !== 'undefined' ? __app_id : 'techcup-2026';
+
+        // Inicializa Serviços
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // ==========================================
+        // DADOS DAS TURMAS
+        // ==========================================
+        const classData = {
+            '1_ipi': {
+                name: "1ª IPI",
+                maxMembers: 11, // 41 alunos em 4 grupos
+                teachers: ["Marlúcia", "Danielle", "Rodrigo"],
+                students: [
+                    "ALUNO TESTE",
+                    "ALLICIA P. F. F.", "BEATRIZ M. S.", "CARLOS GABRIEL D. S. D. S.", 
+                    "DIENIFFER P. D. S.", "ELOA H. D. M.", "GABRIEL D. D. S.", 
+                    "GABRIELLE M. D. Q.", "IARA P. D. S.", "IARA R. R.", 
+                    "JULIA A. M. D. S. X.", "JULIANA B. P. D. S.", "JULIANA N. A.", 
+                    "KAMILLY V. E. Z.", "KAUAN P. M.", "LARISSA M. G.", 
+                    "LETICIA S. D. M.", "LUIZ P. R. C.", "LUCAS C. V.", "MANUELA F. D. S.", 
+                    "MARCELLY L. M.", "MARIA C. F. B.", "MARIA C. H. R.", 
+                    "MARIA F. X. P.", "MARIA V. S. D. S. C.", "MARIANA A. D. S.", 
+                    "MATEUS B. F.", "MAYARA P. G.", "MAYRA M. A.", 
+                    "MAYRON V. V. N. R.", "NATHALIA E. C.", "PEDRO H. D. S. C.", 
+                    "PEDRO L. L. D. S.", "RAFAEL D. A. S.", "RAFAELA B. F.", 
+                    "RAFAELLA S. L.", "RAFAELLI S. A.", "THALLIS D. S. L.", 
+                    "THAYANE B. L.", "VALENTINNA D. A. C.", "YASMIN C. D. O.", 
+                    "YUD C. R. M. P."
+                ].sort()
+            },
+            '2_ipi': {
+                name: "2ª IPI",
+                maxMembers: 10, // 37 alunos em 4 grupos
+                teachers: ["Letícia", "Romerson", "Rodrigo"],
+                students: [
+                    "ALUNO TESTE",
+                    "ALLETSON P. F. D. S.", "ALLYSTER L. D. S. N.", "ANA C. C. M.",
+                    "ANA C. V. M.", "AQUILA S. D.", "BIANCA R. S. J.",
+                    "BRYAN M. B.", "DAFNI V. D. A.", "DANIELLA A. F.",
+                    "DAVI L. A.", "DELAIAS C. B.", "EMANUELLY R. F.",
+                    "EVILLYN A. T. F.", "GIOVANNI P. P.", "GUILHERME B. G. T.",
+                    "GUILHERME F. D. A. M.", "HEDER O. D. S.", "HEITOR D. S. S.",
+                    "HENRY M. D. S. L.", "HIURY D. S. G.", "HYURI V. D. S.",
+                    "ITALO G. N.", "LARISSA S. D. S.", "LAYS L. F.",
+                    "LEANDRO R. D. S. A. S. B.", "LETICIA B. R.", "LYNCON P. D. O.",
+                    "MARCELA C. B.", "MARIA E. S. F.", "MARIANA D. S. T.",
+                    "MICKELLY D. P. B.", "NATHALYA M. L. D.", "RAFAEL J. P. D. S. P.",
+                    "RAFAEL R. M.", "RAYSSA M. P. B.", "RYAN D. S. C.", "WESLEY A. C."
+                ].sort()
+            }
+        };
+
+        // Estado Global
+        let currentClass = null;
+        let authUser = null;
+        let unsubscribeSnapshot = null;
+        let groups = { 1: [], 2: [], 3: [], 4: [] };
+
+        // ==========================================
+        // LÓGICA DE INICIALIZAÇÃO E AUTENTICAÇÃO
+        // ==========================================
+        async function initApp() {
+            try {
+                // Autenticação anônima requerida pelo Firebase para ler/escrever dados de forma segura
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        authUser = user;
+                        // Esconde loader, mostra seleção de turma
+                        document.getElementById('loading-view').classList.add('hidden');
+                        document.getElementById('class-selection-view').classList.remove('hidden');
+                    }
+                });
+            } catch (error) {
+                console.error("Erro na autenticação:", error);
+                alert("Erro ao conectar com o banco de dados. Verifique as credenciais do Firebase.");
+            }
+        }
+
+        // ==========================================
+        // FUNÇÕES DE INTERFACE
+        // ==========================================
+        window.selectClass = function(classId) {
+            currentClass = classId;
+            
+            // Troca de tela
+            document.getElementById('class-selection-view').classList.add('hidden');
+            document.getElementById('main-app-view').classList.remove('hidden');
+            document.getElementById('current-class-title').textContent = classData[classId].name;
+            
+            // Renderiza Professores Responsáveis
+            document.getElementById('current-class-teachers').textContent = "Professores: " + classData[classId].teachers.join(", ");
+
+            // Reset local e inicia escuta do Firebase
+            groups = { 1: [], 2: [], 3: [], 4: [] };
+            listenToGroupsRealtime(classId);
+        };
+
+        window.goBack = function() {
+            currentClass = null;
+            if (unsubscribeSnapshot) {
+                unsubscribeSnapshot(); // Para de escutar o Firebase ao voltar
+            }
+            
+            // Troca de tela
+            document.getElementById('main-app-view').classList.add('hidden');
+            document.getElementById('class-selection-view').classList.remove('hidden');
+        };
+
+        // Escuta os dados no Firebase em Tempo Real
+        function listenToGroupsRealtime(classId) {
+            if (!authUser) return;
+            
+            // Caminho da coleção no Firestore
+            const docRef = doc(db, 'artifacts', projectAppId, 'public', 'data', 'techcup_groups', classId);
+
+            unsubscribeSnapshot = onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.groups) {
+                        groups = data.groups;
+                    }
+                } else {
+                    // Se o documento ainda não existir, cria vazio
+                    groups = { 1: [], 2: [], 3: [], 4: [] };
+                }
+                
+                // Atualiza a tela automaticamente sempre que alguém em qualquer PC fizer uma escolha
+                renderStudentsDropdown();
+                renderGroups();
+            }, (error) => {
+                console.error("Erro ao escutar dados:", error);
+                showMessage("Erro de sincronização com o servidor.", true);
+            });
+        }
+
+        function getAvailableStudents() {
+            if (!currentClass) return [];
+            const allStudentsForClass = classData[currentClass].students;
+            const studentsInGroups = Object.values(groups).flat();
+            
+            return allStudentsForClass.filter(student => !studentsInGroups.includes(student));
+        }
+
+        function renderStudentsDropdown() {
+            const select = document.getElementById('student-select');
+            const availableStudents = getAvailableStudents();
+            
+            select.innerHTML = '<option value="">Selecione o seu nome...</option>';
+            availableStudents.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student;
+                option.textContent = student;
+                select.appendChild(option);
+            });
+        }
+
+        function renderGroups() {
+            const container = document.getElementById('groups-container');
+            container.innerHTML = '';
+
+            const maxMembers = classData[currentClass].maxMembers;
+
+            const colors = {
+                1: 'border-blue-400 bg-blue-50',
+                2: 'border-purple-400 bg-purple-50',
+                3: 'border-emerald-400 bg-emerald-50',
+                4: 'border-orange-400 bg-orange-50'
+            };
+
+            for (let i = 1; i <= 4; i++) {
+                const members = groups[i];
+                const isFull = members.length >= maxMembers;
+                
+                const card = document.createElement('div');
+                card.className = `glass-panel rounded-2xl p-5 border-t-4 ${colors[i]} flex flex-col h-full`;
+                
+                // Botão de remover SÓ aparece se for o ALUNO TESTE
+                let listHtml = members.map(member => {
+                    const isTest = member === "ALUNO TESTE";
+                    return `
+                        <li class="flex justify-between items-center py-2 border-b border-gray-200 last:border-0 text-sm font-medium text-gray-700">
+                            <span>${member}</span>
+                            ${isTest ? `<button onclick="window.removeStudent(${i}, '${member}')" class="text-red-500 hover:text-red-700 font-bold px-2 py-1 rounded bg-red-50 hover:bg-red-100 transition-colors text-xs" title="Remover Teste">X</button>` : ''}
+                        </li>
+                    `;
+                }).join('');
+
+                if (members.length === 0) {
+                    listHtml = `<li class="py-4 text-center text-gray-400 text-sm italic">Nenhum membro ainda</li>`;
+                }
+
+                card.innerHTML = `
+                    <div class="mb-4 pb-2 border-b border-gray-200">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="text-lg font-bold text-gray-800">Equipe ${i}</h4>
+                            <span class="text-xs font-bold px-2 py-1 rounded-full ${isFull ? 'bg-red-100 text-red-600' : 'bg-gray-200 text-gray-700'}">
+                                ${members.length} / ${maxMembers}
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">Tema: <span class="text-gray-400 italic normal-case">A definir</span></p>
+                    </div>
+                    <ul class="flex-grow">
+                        ${listHtml}
+                    </ul>
+                `;
+                
+                container.appendChild(card);
+            }
+        }
+
+        function showMessage(text, isError = false, permanent = false) {
+            const msgBox = document.getElementById('message-box');
+            msgBox.textContent = text;
+            msgBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
+            
+            if (isError) {
+                msgBox.classList.add('bg-red-100', 'text-red-700');
+            } else if (text.includes("Salvando")) {
+                msgBox.classList.add('bg-blue-100', 'text-blue-700');
+            } else {
+                msgBox.classList.add('bg-green-100', 'text-green-700');
+            }
+
+            if (!permanent) {
+                setTimeout(() => {
+                    msgBox.classList.add('hidden');
+                }, 4000);
+            }
+        }
+
+        // ==========================================
+        // AÇÕES: INSCREVER E REMOVER
+        // ==========================================
+        window.joinGroup = async function() {
+            if (!authUser) return;
+
+            const student = document.getElementById('student-select').value;
+            const groupId = document.getElementById('group-select').value;
+            const btn = document.getElementById('confirm-btn');
+
+            if (!student) { showMessage("Por favor, selecione seu nome na lista.", true); return; }
+            if (!groupId) { showMessage("Por favor, escolha uma equipe.", true); return; }
+
+            const maxMembers = classData[currentClass].maxMembers;
+
+            if (groups[groupId].length >= maxMembers) {
+                showMessage(`A Equipe ${groupId} já está lotada!`, true);
+                return;
+            }
+
+            // Atualiza visualmente primeiro para dar feedback imediato
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader" style="width:20px; height:20px; border-width:3px; border-top-color:white;"></div>';
+            
+            // Adiciona localmente (o snapshot vai confirmar isso depois)
+            groups[groupId].push(student);
+            
+            try {
+                // Salva no banco de dados
+                const docRef = doc(db, 'artifacts', projectAppId, 'public', 'data', 'techcup_groups', currentClass);
+                
+                // SetDoc com merge garante que se o documento não existir, ele será criado
+                await setDoc(docRef, { groups }, { merge: true });
+                
+                // Sucesso!
+                document.getElementById('student-select').value = '';
+                document.getElementById('group-select').value = '';
+                showMessage("Inscrição confirmada com sucesso!");
+                
+            } catch (error) {
+                console.error("Erro ao salvar:", error);
+                showMessage("Erro ao salvar no servidor. Tente novamente.", true);
+                // Reverte localmente em caso de erro
+                groups[groupId] = groups[groupId].filter(s => s !== student);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Confirmar';
+                // Atualiza a tela
+                renderStudentsDropdown();
+                renderGroups();
+            }
+        };
+
+        // Função exclusiva para o Aluno Teste poder sair do grupo
+        window.removeStudent = async function(groupId, studentName) {
+            if (!authUser || studentName !== "ALUNO TESTE") return;
+
+            // Remove localmente primeiro
+            groups[groupId] = groups[groupId].filter(s => s !== studentName);
+            
+            try {
+                const docRef = doc(db, 'artifacts', projectAppId, 'public', 'data', 'techcup_groups', currentClass);
+                await setDoc(docRef, { groups }, { merge: true });
+                showMessage("Aluno teste removido com sucesso!");
+            } catch (error) {
+                console.error("Erro ao remover:", error);
+                showMessage("Erro ao remover no servidor.", true);
+            }
+        };
+
+        // Iniciar tudo ao carregar
+        window.addEventListener('DOMContentLoaded', initApp);
+
+    </script>
+</body>
+</html>
